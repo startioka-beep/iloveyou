@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Valentine Scroll</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Lalezar&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="intro.css" />
+</head>
+
+<body>
+  <!-- Romantic Intro Overlay -->
+  <div id="intro-overlay">
+    <div class="intro-container"></div>
+    <button id="intro-skip">Skip Intro</button>
+  </div>
+
+  <main class="page">
+    <section class="scroll-stage">
+      <div class="video-stack" aria-label="Valentine videos">
+        <video id="videoForward" class="hero-video is-active" autoplay muted playsinline preload="auto">
+          <source src="./No.mp4" type="video/mp4" />
+        </video>
+        <video id="videoReverse" class="hero-video" muted playsinline preload="auto">
+          <source src="./No-ezgif.com-reverse-video.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="action-row is-visible" id="actionRow" aria-label="Valentine actions">
+        <button class="action-btn" id="btnPuzzle" type="button">puzzle</button>
+      </div>
+    </section>
+
+    <!-- Puzzle Overlay -->
+    <div id="puzzle-overlay">
+      <div class="puzzle-header">
+        <h2>Piece of My Heart</h2>
+        <button class="btn-close" id="btnClosePuzzle" type="button" aria-label="Close puzzle">&times;</button>
+      </div>
+      <div class="puzzle-main">
+        <div id="piece-tray" aria-label="Puzzle pieces"></div>
+        <div id="puzzle-grid">
+          <div id="drop-zone" aria-label="Drop target"></div>
+          <div id="puzzle-video-container" class="puzzle-video-wrapper">
+            <video id="puzzle-completion-video" class="puzzle-video" muted playsinline preload="auto">
+              <source src="./video.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="win-banner">
+      <h3>Perfectly Matched!</h3>
+      <p>Every piece is exactly where it belongs.</p>
+      <button class="btn-restart" id="btnRestartPuzzle">New Puzzle</button>
+    </div>
+
+    <div id="finish-page" class="finish-page" aria-label="Puzzle complete">
+      <h1 class="finish-heading" id="finishHeading">your rose my rose</h1>
+      <div class="stickers-container" aria-hidden="true">
+        <div class="sticker sticker-1"><img src="./stickers/0069ce0d237802c33060ebcdca530fcf.jpg" alt="sticker"></div>
+        <div class="sticker sticker-2"><img src="./stickers/0453d2dc51c1fd3309fec529b25bd984.jpg" alt="sticker"></div>
+        <div class="sticker sticker-3"><img src="./stickers/5a91513148db18861660051c78f0b4ab.jpg" alt="sticker"></div>
+        <div class="sticker sticker-4"><img src="./stickers/812ea6814050faae0a86d1959894bc3e.jpg" alt="sticker"></div>
+        <div class="sticker sticker-5"><img src="./stickers/d9f44f2456895e3e1a3a34b172905c64.jpg" alt="sticker"></div>
+        <div class="sticker sticker-6 is-transparent"><img src="./stickers/download.png" alt="sticker"></div>
+        <div class="sticker sticker-7"><img src="./stickers/e95667b8e81ef6d132ba1a6eeb1f1fa1.jpg" alt="sticker"></div>
+      </div>
+      <div class="finish-content" aria-live="polite">
+        <div class="finish-panel is-active" id="finishIntro">
+          <p class="finish-intro">شطورتييييييييي</p>
+          <button class="finish-btn" id="btnFinishOk" type="button">okay</button>
+        </div>
+        <div class="finish-gallery">
+          <div class="finish-messages left" id="finishMessages" aria-hidden="true">
+            <p class="finish-message message-left-top">i will always love you, for the rest of my life</p>
+            <p class="finish-message message-left-bottom">life would be rough asf without you in it</p>
+          </div>
+          <div class="finish-image" id="finishImage" aria-hidden="true">
+            <img src="./beige_background_zigzag.jpg" alt="Bouquet on zigzag beige" />
+          </div>
+          <div class="finish-messages right" id="finishMessagesRight" aria-hidden="true">
+            <p class="finish-message message-right-top">you will always be my first choice rose</p>
+            <p class="finish-message message-right-bottom">for the love of my life</p>
+          </div>
+        </div>
+        <a href="letter.html" class="letter-btn" id="btnLetter">A Letter For You ❤️</a>
+      </div>
+    </div>
+
+  </main>
+
+
+  <script>
+    const forward = document.getElementById("videoForward");
+    const reverse = document.getElementById("videoReverse");
+    let active = "forward";
+
+    const btnPuzzle = document.getElementById("btnPuzzle");
+    // Button added dynamically
+    // const btnLetter = document.getElementById("btnLetter"); // We'll get it below or just use getElementById inside function if we want to be safe, but let's define it.
+
+    btnPuzzle.addEventListener("click", () => {
+      openPuzzle();
+    });
+
+    // Puzzle Logic
+    const puzzleOverlay = document.getElementById("puzzle-overlay");
+    const btnClosePuzzle = document.getElementById("btnClosePuzzle");
+    const btnRestartPuzzle = document.getElementById("btnRestartPuzzle");
+    const tray = document.getElementById("piece-tray");
+    const dropZone = document.getElementById("drop-zone");
+    const puzzleWinBanner = document.getElementById("win-banner");
+    const finishPage = document.getElementById("finish-page");
+    const finishIntro = document.getElementById("finishIntro");
+    const finishImage = document.getElementById("finishImage");
+    const btnFinishOk = document.getElementById("btnFinishOk");
+    const finishHeading = document.getElementById("finishHeading");
+    const finishMessages = document.getElementById("finishMessages");
+    const finishMessagesRight = document.getElementById("finishMessagesRight");
+    const btnLetter = document.getElementById("btnLetter");
+
+    const PUZZLE_IMAGE_PATH = './Enhanced 4x4 Square Image.jpg';
+    const PUZZLE_GRID_SIZE = 3;
+    let puzzleDraggedPiece = null;
+
+    const stickersContainer = document.querySelector(".stickers-container");
+
+    function openPuzzle() {
+      puzzleOverlay.classList.add("is-active");
+      initPuzzle();
+    }
+
+    function closePuzzle() {
+      puzzleOverlay.classList.remove("is-active");
+      puzzleWinBanner.classList.remove("is-active");
+      finishPage.classList.remove("is-active");
+      finishIntro.classList.add("is-active");
+      finishImage.classList.remove("is-active");
+      finishImage.setAttribute("aria-hidden", "true");
+      finishHeading.classList.remove("is-active");
+      finishMessages.classList.remove("is-active");
+      finishMessages.setAttribute("aria-hidden", "true");
+      finishMessagesRight.classList.remove("is-active");
+      finishMessagesRight.setAttribute("aria-hidden", "true");
+      if (btnLetter) btnLetter.classList.remove("is-active");
+      // Reset stickers to visible
+      stickersContainer.classList.remove("is-hidden");
+    }
+
+    function openFinishPage() {
+      puzzleOverlay.classList.remove("is-active");
+      puzzleWinBanner.classList.remove("is-active");
+      finishPage.classList.add("is-active");
+      finishIntro.classList.add("is-active");
+      finishImage.classList.remove("is-active");
+      finishImage.setAttribute("aria-hidden", "true");
+      finishHeading.classList.remove("is-active");
+      finishMessages.classList.remove("is-active");
+      finishMessages.setAttribute("aria-hidden", "true");
+      finishMessagesRight.classList.remove("is-active");
+      finishMessagesRight.setAttribute("aria-hidden", "true");
+      if (btnLetter) btnLetter.classList.remove("is-active");
+      // Reset stickers to visible
+      stickersContainer.classList.remove("is-hidden");
+    }
+
+    btnClosePuzzle.addEventListener("click", closePuzzle);
+    btnRestartPuzzle.addEventListener("click", initPuzzle);
+
+    function initPuzzle() {
+      tray.innerHTML = '';
+      dropZone.innerHTML = '';
+      puzzleWinBanner.classList.remove("is-active");
+      const pieces = [];
+
+      // 1. Create Grid
+      for (let i = 0; i < PUZZLE_GRID_SIZE * PUZZLE_GRID_SIZE; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        cell.dataset.index = i;
+        cell.addEventListener('dragover', (e) => e.preventDefault());
+        cell.addEventListener('dragenter', (e) => e.target.classList.add('drag-over'));
+        cell.addEventListener('dragleave', (e) => e.target.classList.remove('drag-over'));
+        cell.addEventListener('drop', handleDrop);
+        dropZone.appendChild(cell);
+      }
+
+      // Tray drop
+      tray.addEventListener('dragover', (e) => e.preventDefault());
+      tray.addEventListener('drop', handleReturnToTray);
+
+      // 2. Create Pieces
+      for (let r = 0; r < PUZZLE_GRID_SIZE; r++) {
+        for (let c = 0; c < PUZZLE_GRID_SIZE; c++) {
+          const index = r * PUZZLE_GRID_SIZE + c;
+          const piece = document.createElement('div');
+          piece.className = 'puzzle-piece';
+          piece.draggable = true;
+          piece.dataset.correctIndex = index;
+
+          const x = (c / (PUZZLE_GRID_SIZE - 1)) * 100;
+          const y = (r / (PUZZLE_GRID_SIZE - 1)) * 100;
+
+          piece.style.backgroundImage = `url('${PUZZLE_IMAGE_PATH}')`;
+          piece.style.backgroundSize = `${PUZZLE_GRID_SIZE * 100}% ${PUZZLE_GRID_SIZE * 100}%`;
+          piece.style.backgroundPosition = `${x}% ${y}%`;
+
+          piece.addEventListener('dragstart', (e) => {
+            puzzleDraggedPiece = e.target;
+            e.target.classList.add('dragging');
+          });
+          piece.addEventListener('dragend', (e) => {
+            e.target.classList.remove('dragging');
+          });
+
+          pieces.push(piece);
+        }
+      }
+
+      // Shuffle
+      for (let i = pieces.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+      }
+      pieces.forEach(p => tray.appendChild(p));
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      const cell = e.target.closest('.grid-cell');
+      if (!cell || cell.children.length > 0) return;
+      cell.classList.remove('drag-over');
+      cell.appendChild(puzzleDraggedPiece);
+      checkWin();
+    }
+
+    function handleReturnToTray(e) {
+      e.preventDefault();
+      tray.appendChild(puzzleDraggedPiece);
+    }
+
+    function checkWin() {
+      const cells = document.querySelectorAll('.grid-cell');
+      let matches = 0;
+      cells.forEach(cell => {
+        if (cell.children.length > 0 && cell.children[0].dataset.correctIndex === cell.dataset.index) {
+          matches++;
+        }
+      });
+
+      if (matches === PUZZLE_GRID_SIZE * PUZZLE_GRID_SIZE) {
+        // Success! Trigger the seamless video transition
+        playPuzzleVideoTransition();
+      }
+    }
+
+    /* -----------------------------------------------------------
+       NEW: Video Transition Logic
+       This handles the seamless morph from puzzle to video 
+       before continuing to the original completion flow.
+    ----------------------------------------------------------- */
+    function playPuzzleVideoTransition() {
+      const dropZone = document.getElementById("drop-zone");
+      const videoContainer = document.getElementById("puzzle-video-container");
+      const video = document.getElementById("puzzle-completion-video");
+
+      // 1. Brief pause to register completion (0.3s)
+      setTimeout(() => {
+        // 2. Play "Lock In" animation on the grid
+        dropZone.classList.add("puzzle-lock-animation");
+
+        // Wait for lock animation to settle (e.g., 0.6s)
+        setTimeout(() => {
+          // 3. Position video container EXACTLY over the drop zone
+          // Since #puzzle-grid is relative, we can just position absolute to match offset
+          // (Drop zone is centered by flex, so we need exact coordinates)
+
+          // Force reflow to ensure updated metrics
+          const rect = dropZone.getBoundingClientRect();
+          /* 
+             Note: Since we are inside a relative parent (#puzzle-grid), using offsetLeft/Top 
+             is cleaner than rects if no transforms are applied to parents. 
+             But if flex centering is involved, offsetLeft works relative to the flex container.
+          */
+          videoContainer.style.width = dropZone.offsetWidth + 'px';
+          videoContainer.style.height = dropZone.offsetHeight + 'px';
+          videoContainer.style.top = dropZone.offsetTop + 'px';
+          videoContainer.style.left = dropZone.offsetLeft + 'px';
+
+          // 4. Play video and fade it in
+          // Reset video time
+          video.currentTime = 0;
+
+          // Play promise to handle autoplay restrictions
+          const playPromise = video.play();
+
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              // Video started playing - Show container
+              videoContainer.classList.add("is-playing");
+            }).catch(error => {
+              console.warn("Autoplay preventing video transition. Skipping to end.", error);
+              // Fallback if video fails
+              completeOriginalPuzzleFlow();
+            });
+          }
+
+          // 5. When video ends, proceed to original flow
+          video.onended = () => {
+            // Optional: fade out video slightly before switching? 
+            // Or just switch immediately. User asked for subsequent flow.
+            completeOriginalPuzzleFlow();
+          };
+
+        }, 600); // Wait for lock animation
+      }, 300); // Initial pause
+    }
+
+    // Encapsulates the ORIGINAL completion logic
+    function completeOriginalPuzzleFlow() {
+      const videoContainer = document.getElementById("puzzle-video-container");
+      const dropZone = document.getElementById("drop-zone");
+
+      // Clean up transition state
+      // (Optional: fade out video container?)
+
+      setTimeout(() => {
+        puzzleOverlay.classList.remove("is-active");
+        finishPage.classList.add("is-active");
+        // Ensure stickers are visible on win
+        stickersContainer.classList.remove("is-hidden");
+
+        // Reset styles for next time
+        setTimeout(() => {
+          dropZone.classList.remove("puzzle-lock-animation");
+          videoContainer.classList.remove("is-playing");
+        }, 500);
+
+      }, 400); // Original delay kept or reduced since we already watched a video
+    }
+
+    btnFinishOk.addEventListener("click", () => {
+      finishIntro.classList.remove("is-active");
+      finishImage.classList.add("is-active");
+      finishImage.setAttribute("aria-hidden", "false");
+      finishHeading.classList.add("is-active");
+      finishMessages.classList.add("is-active");
+      finishMessages.setAttribute("aria-hidden", "false");
+      finishMessagesRight.classList.add("is-active");
+      finishMessagesRight.classList.add("is-active");
+      finishMessagesRight.setAttribute("aria-hidden", "false");
+      if (btnLetter) btnLetter.classList.add("is-active");
+      if (btnFinishOk) btnFinishOk.classList.add("is-active"); // Added: add is-active to btnFinishOk
+      // Hide stickers
+      stickersContainer.classList.add("is-hidden");
+    });
+
+    const setActive = (name) => {
+      if (name === "forward") {
+        forward.classList.add("is-active");
+        reverse.classList.remove("is-active");
+      } else {
+        reverse.classList.add("is-active");
+        forward.classList.remove("is-active");
+      }
+    };
+
+    const playNext = () => {
+      if (active === "forward") {
+        reverse.currentTime = 0;
+        reverse.play().then(() => setActive("reverse")).catch(() => { });
+        active = "reverse";
+      } else {
+        forward.currentTime = 0;
+        forward.play().then(() => setActive("forward")).catch(() => { });
+        active = "forward";
+      }
+    };
+
+    forward.addEventListener("ended", playNext);
+    reverse.addEventListener("ended", playNext);
+
+    // Global error handler
+    forward.addEventListener("error", () => {
+      forward.load();
+      forward.play();
+    });
+    reverse.addEventListener("error", () => {
+      reverse.load();
+      reverse.play();
+    });
+
+    // Autoplay interaction fallback
+    window.addEventListener("load", () => {
+      forward.play().catch(() => {
+        const startPlay = () => {
+          if (active === "forward") {
+            forward.play();
+          } else {
+            reverse.play();
+          }
+          document.removeEventListener("mousedown", startPlay);
+          document.removeEventListener("touchstart", startPlay);
+        };
+        document.addEventListener("mousedown", startPlay);
+        document.addEventListener("touchstart", startPlay);
+      });
+    });
+  </script>
+  <script src="intro.js"></script>
+</body>
+
+</html>
