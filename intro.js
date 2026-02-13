@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('intro-overlay');
     const container = document.querySelector('.intro-container');
     const skipBtn = document.getElementById('intro-skip');
+    const loader = document.getElementById('intro-loader');
+    const loaderProgress = document.getElementById('loader-progress');
+    const loaderPercent = document.getElementById('loader-percent');
 
     // Configuration
     const HEART_COUNT = 30; // Number of hearts
@@ -174,7 +177,109 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => overlay.style.display = 'none', 1000);
     });
 
-    // Start
-    createHearts();
-    requestAnimationFrame(animate);
+    function preloadImage(src) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = src;
+        });
+    }
+
+    function preloadVideo(src) {
+        return new Promise(resolve => {
+            const video = document.createElement('video');
+            let settled = false;
+
+            const finish = () => {
+                if (settled) return;
+                settled = true;
+                video.removeAttribute('src');
+                video.load();
+                resolve();
+            };
+
+            video.preload = 'auto';
+            video.muted = true;
+            video.playsInline = true;
+            video.addEventListener('canplaythrough', finish, { once: true });
+            video.addEventListener('loadeddata', finish, { once: true });
+            video.addEventListener('error', finish, { once: true });
+            video.src = src;
+            video.load();
+
+            setTimeout(finish, 8000);
+        });
+    }
+
+    function getAssetUrls() {
+        const urls = new Set();
+
+        document.querySelectorAll('img').forEach(img => {
+            if (img.currentSrc) {
+                urls.add(img.currentSrc);
+            } else if (img.getAttribute('src')) {
+                urls.add(img.getAttribute('src'));
+            }
+        });
+
+        document.querySelectorAll('video source').forEach(source => {
+            const src = source.getAttribute('src');
+            if (src) urls.add(src);
+        });
+
+        urls.add('./Enhanced 4x4 Square Image.jpg');
+
+        return Array.from(urls);
+    }
+
+    function updateProgress(current, total) {
+        const percent = total === 0 ? 100 : Math.min(100, Math.round((current / total) * 100));
+        if (loaderProgress) loaderProgress.style.width = `${percent}%`;
+        if (loaderPercent) loaderPercent.textContent = `${percent}%`;
+    }
+
+    function preloadAssets() {
+        const urls = getAssetUrls();
+        let loaded = 0;
+
+        updateProgress(loaded, urls.length);
+
+        if (urls.length === 0) {
+            return Promise.resolve();
+        }
+
+        const imageRegex = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
+        const videoRegex = /\.(mp4|webm|ogg)$/i;
+
+        return Promise.all(
+            urls.map(url => {
+                const loaderPromise = videoRegex.test(url)
+                    ? preloadVideo(url)
+                    : imageRegex.test(url)
+                        ? preloadImage(url)
+                        : Promise.resolve();
+
+                return loaderPromise.finally(() => {
+                    loaded += 1;
+                    updateProgress(loaded, urls.length);
+                });
+            })
+        ).then(() => undefined);
+    }
+
+    function startIntro() {
+        if (isSkipped) return;
+        if (loader) loader.setAttribute('aria-hidden', 'true');
+        overlay.classList.add('is-ready');
+        createHearts();
+        requestAnimationFrame(animate);
+        window.dispatchEvent(new Event('assetsready'));
+    }
+
+    overlay.classList.add('is-loading');
+    preloadAssets().then(() => {
+        overlay.classList.remove('is-loading');
+        startIntro();
+    });
 });

@@ -16,6 +16,15 @@
 <body>
   <!-- Romantic Intro Overlay -->
   <div id="intro-overlay">
+    <div class="intro-loader" id="intro-loader" aria-live="polite">
+      <div class="loader-content">
+        <p class="loader-title">Loading your surprise...</p>
+        <div class="loader-bar">
+          <span class="loader-progress" id="loader-progress"></span>
+        </div>
+        <span class="loader-percent" id="loader-percent">0%</span>
+      </div>
+    </div>
     <div class="intro-container"></div>
     <button id="intro-skip">Skip Intro</button>
   </div>
@@ -23,7 +32,7 @@
   <main class="page">
     <section class="scroll-stage">
       <div class="video-stack" aria-label="Valentine videos">
-        <video id="videoForward" class="hero-video is-active" autoplay muted playsinline preload="auto">
+        <video id="videoForward" class="hero-video is-active" muted playsinline preload="auto">
           <source src="./No.mp4" type="video/mp4" />
         </video>
         <video id="videoReverse" class="hero-video" muted playsinline preload="auto">
@@ -397,7 +406,7 @@
     });
 
     // Autoplay interaction fallback
-    window.addEventListener("load", () => {
+    window.addEventListener("assetsready", () => {
       forward.play().catch(() => {
         const startPlay = () => {
           if (active === "forward") {
